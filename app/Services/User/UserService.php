@@ -2,7 +2,7 @@
 
 namespace App\Services\User;
 
-use App\Contracts\Services\UserServiceInterface;
+use App\Contracts\Services\User\UserServiceInterface;
 use App\Enums\RoleEnum;
 use App\Exceptions\User\AuthorizationException;
 use App\Models\User;
