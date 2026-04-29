@@ -6,13 +6,13 @@ use Exception;
 
 class RepaymentNotFoundException extends Exception
 {
-    public static function notFound(int $id): self
+    public static function notFound(): self
     {
         return new self("Remboursement introuvable.");
     }
 
-    public static function referenceNotFound(string $reference): self
+    public static function referenceNotFound(): self
     {
-        return new self("Aucun remboursement trouvé avec la référence '{$reference}'.");
+        return new self("Aucun remboursement trouvé");
     }
 }

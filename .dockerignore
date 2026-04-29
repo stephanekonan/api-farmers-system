@@ -1,0 +1,54 @@
+# Git
+.git
+.gitignore
+
+# Docker
+.dockerignore
+docker-compose.yml
+Dockerfile
+docker/
+
+# Documentation
+README.md
+
+# Environment
+.env
+.env.*.local
+
+# Testing
+tests/
+phpunit.xml
+.code-coverage
+
+# Logs
+storage/logs/*
+*.log
+
+# Cache
+bootstrap/cache/*
+storage/cache/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+
+# Vendor and Node
+vendor/
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local development
+.gitattributes
+.editorconfig
+
+# Backup files
+*.backup
+*.bak
