@@ -19,7 +19,6 @@ class UpdateUserRequest extends FormRequest
 
         return [
             'username' => ['sometimes', 'string', 'max:255'],
-            'pseudo' => ['sometimes', 'string', 'max:255', Rule::unique('users', 'pseudo')->ignore($userId)],
             'email' => ['sometimes', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
             'password' => ['sometimes', 'string', 'min:8', 'confirmed'],
             'role' => ['sometimes', Rule::in(array_column(RoleEnum::cases(), 'value'))],

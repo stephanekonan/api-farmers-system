@@ -17,7 +17,6 @@ class StoreUserRequest extends FormRequest
     {
         return [
             'username' => ['required', 'string', 'max:255'],
-            'pseudo' => ['required', 'string', 'max:255', 'unique:users,pseudo'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'role' => ['required', Rule::in(array_column(RoleEnum::cases(), 'value'))],
