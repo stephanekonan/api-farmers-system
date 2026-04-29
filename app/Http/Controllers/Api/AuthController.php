@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Auth\LoginRequest;
 use App\Services\AuthService;
+use App\Http\Resources\Api\Auth\LoginResource;
+use App\Http\Resources\Api\Auth\UserResource;
+use App\Http\Resources\Api\Auth\SessionResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -24,23 +27,13 @@ class AuthController extends Controller
             userAgent: $request->userAgent(),
         );
 
-        return response()->json([
-            'token' => $result['token'],
-            'token_type' => 'Bearer',
-            'expires_at' => $result['expires_at'],
-            'user' => [
-                'id' => $result['user']->id,
-                'name' => $result['user']->name,
-                'email' => $result['user']->email,
-                'role' => $result['user']->role->value,
-            ],
-        ]);
+        return response()->json(LoginResource::make($result));
     }
 
 
     public function logout(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()->delete();
+        $this->authService->logout($request->user(), $request->user()->currentAccessToken()->id);
 
         return response()->json(['message' => 'Déconnexion réussie.']);
     }
@@ -48,9 +41,9 @@ class AuthController extends Controller
 
     public function logoutAll(Request $request): JsonResponse
     {
-        $request->user()->tokens()->delete();
+        $count = $this->authService->logoutAll($request->user());
 
-        return response()->json(['message' => 'Tous les appareils ont été déconnectés.']);
+        return response()->json(['message' => "{$count} appareil(s) déconnecté(s)."]);
     }
 
 
@@ -58,25 +51,14 @@ class AuthController extends Controller
     {
         $user = $request->user();
 
-        return response()->json([
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'role' => $user->role->value,
-            'is_active' => $user->is_active,
-            'created_at' => $user->created_at,
-        ]);
+        return response()->json(UserResource::make($request->user()));
     }
 
 
     public function refresh(Request $request): JsonResponse
     {
-        $user = $request->user();
-
-        $request->user()->currentAccessToken()->delete();
-
-        $result = $this->authService->issueToken(
-            user: $user,
+        $result = $this->authService->refreshToken(
+            user: $request->user(),
             deviceName: $request->input('device_name', 'refresh'),
             ip: $request->ip(),
         );
@@ -91,32 +73,23 @@ class AuthController extends Controller
 
     public function sessions(Request $request): JsonResponse
     {
-        $tokens = $request->user()
-            ->tokens()
-            ->whereNull('expires_at')
-            ->orWhere('expires_at', '>', now())
-            ->get()
-            ->map(fn($t) => [
-                'id' => $t->id,
-                'device_name' => $t->device_name,
-                'ip_address' => $t->ip_address,
-                'last_used_at' => $t->last_used_at,
-                'created_at' => $t->created_at,
-                'is_current' => $t->id === $request->user()->currentAccessToken()->id,
-            ]);
+        $sessions = $this->authService->getActiveSessions($request->user());
+        $currentTokenId = $request->user()->currentAccessToken()->id;
 
-        return response()->json(['sessions' => $tokens]);
+        $tokens = collect($sessions)->map(function ($session) use ($currentTokenId) {
+            $session['is_current'] = $session['id'] === $currentTokenId;
+            return $session;
+        });
+
+        return response()->json(['sessions' => SessionResource::collection($tokens)]);
     }
 
 
     public function revokeSession(Request $request, int $tokenId): JsonResponse
     {
-        $deleted = $request->user()
-            ->tokens()
-            ->where('id', $tokenId)
-            ->delete();
+        $success = $this->authService->revokeSession($request->user(), $tokenId);
 
-        if (!$deleted) {
+        if (!$success) {
             return response()->json(['message' => 'Session introuvable.'], 404);
         }
 

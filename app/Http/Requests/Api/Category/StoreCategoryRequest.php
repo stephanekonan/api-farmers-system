@@ -14,7 +14,7 @@ class StoreCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
+            'category_name' => ['required', 'string', 'max:255'],
             'slug' => ['required', 'string', 'max:255', 'unique:categories,slug'],
             'description' => ['nullable', 'string'],
             'parent_id' => ['nullable', 'exists:categories,id'],
@@ -25,9 +25,9 @@ class StoreCategoryRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Le nom de la catégorie est requis.',
-            'name.string' => 'Le nom doit être une chaîne de caractères.',
-            'name.max' => 'Le nom ne peut pas dépasser 255 caractères.',
+            'category_name.required' => 'Le nom de la catégorie est requis.',
+            'category_name.string' => 'Le nom doit être une chaîne de caractères.',
+            'category_name.max' => 'Le nom ne peut pas dépasser 255 caractères.',
             'slug.required' => 'Le slug est requis.',
             'slug.string' => 'Le slug doit être une chaîne de caractères.',
             'slug.max' => 'Le slug ne peut pas dépasser 255 caractères.',

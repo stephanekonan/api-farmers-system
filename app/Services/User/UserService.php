@@ -1,13 +1,16 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\User;
 
+use App\Contracts\Services\UserServiceInterface;
 use App\Enums\RoleEnum;
+use App\Exceptions\User\AuthorizationException;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
-class UserService
+class UserService implements UserServiceInterface
 {
     public function create(array $data, ?User $creator = null): User
     {
@@ -50,6 +53,31 @@ class UserService
         return $user->fresh();
     }
 
+    public function findById(int $id): ?User
+    {
+        return User::find($id);
+    }
+
+    public function findByEmail(string $email): ?User
+    {
+        return User::where('email', $email)->first();
+    }
+
+    public function getSubordinates(User $supervisor): Collection
+    {
+        return $supervisor->subordinates()->get();
+    }
+
+    public function activate(User $user): void
+    {
+        $user->update(['is_active' => true]);
+    }
+
+    public function deactivate(User $user): void
+    {
+        $user->update(['is_active' => false]);
+    }
+
     public function delete(User $user, ?User $deleter = null): void
     {
         $this->validateRoleHierarchy($deleter, null, $user);
@@ -63,7 +91,7 @@ class UserService
         $user->delete();
     }
 
-    public function getUsersByRole(RoleEnum $role, ?User $requester = null): \Illuminate\Database\Eloquent\Collection
+    public function getUsersByRole(RoleEnum $role, ?User $requester = null): Collection
     {
         $query = User::where('role', $role);
 
@@ -81,31 +109,23 @@ class UserService
         }
 
         if ($requester->isOperator()) {
-            throw ValidationException::withMessages([
-                'role' => 'Les opérateurs ne peuvent pas gérer les utilisateurs.',
-            ]);
+            throw AuthorizationException::cannotManageUsers();
         }
 
         if ($targetRole) {
             $targetRoleEnum = RoleEnum::from($targetRole);
 
             if ($requester->isSupervisor() && $targetRoleEnum === RoleEnum::ADMIN) {
-                throw ValidationException::withMessages([
-                    'role' => 'Les superviseurs ne peuvent pas créer ou modifier d\'administrateurs.',
-                ]);
+                throw AuthorizationException::cannotManageAdmins();
             }
 
             if ($requester->isSupervisor() && $targetUser && $targetUser->created_by !== $requester->id) {
-                throw ValidationException::withMessages([
-                    'user' => 'Vous ne pouvez modifier que vos propres opérateurs.',
-                ]);
+                throw AuthorizationException::cannotModifyOtherOperators();
             }
         }
 
         if ($targetUser && $targetUser->isAdmin() && !$requester->isAdmin()) {
-            throw ValidationException::withMessages([
-                'user' => 'Seul un administrateur peut modifier un autre administrateur.',
-            ]);
+            throw AuthorizationException::cannotModifyAdmins();
         }
     }
 }
