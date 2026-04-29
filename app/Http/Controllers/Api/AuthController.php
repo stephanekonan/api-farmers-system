@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Auth\LoginRequest;
-use App\Services\AuthService;
+use App\Services\Auth\AuthService;
 use App\Http\Resources\Api\Auth\LoginResource;
 use App\Http\Resources\Api\Auth\UserResource;
 use App\Http\Resources\Api\Auth\SessionResource;

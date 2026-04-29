@@ -2,7 +2,7 @@
 
 namespace App\Services\Product;
 
-use App\Contracts\Services\CategoryServiceInterface;
+use App\Contracts\Services\Product\CategoryServiceInterface;
 use App\Models\Category;
 use App\Exceptions\Category\CategoryNotFoundException;
 use App\Exceptions\Category\CategoryValidationException;
@@ -101,7 +101,7 @@ class CategoryService implements CategoryServiceInterface
     {
         $parent = Category::find($parentId);
         if (!$parent) {
-            throw CategoryNotFoundException::categoryNotFound($parentId);
+            throw CategoryNotFoundException::notFound($parentId);
         }
 
         return $parent->children()

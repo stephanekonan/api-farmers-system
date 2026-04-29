@@ -2,7 +2,7 @@
 
 namespace App\Services\Product;
 
-use App\Contracts\Services\ProductServiceInterface;
+use App\Contracts\Services\Product\ProductServiceInterface;
 use App\Models\Category;
 use App\Models\Product;
 use App\Exceptions\Product\ProductNotFoundException;
