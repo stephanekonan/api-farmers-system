@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Farmer extends Model
@@ -27,4 +28,18 @@ class Farmer extends Model
         'is_active' => 'boolean',
     ];
 
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    public function debts(): HasMany
+    {
+        return $this->hasMany(Debt::class);
+    }
+
+    public function repayments(): HasMany
+    {
+        return $this->hasMany(Repayment::class);
+    }
 }

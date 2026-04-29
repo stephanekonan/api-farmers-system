@@ -3,6 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Transaction extends Model
 {
@@ -28,4 +31,23 @@ class Transaction extends Model
         'transacted_at' => 'datetime',
     ];
 
+    public function farmer(): BelongsTo
+    {
+        return $this->belongsTo(Farmer::class);
+    }
+
+    public function operator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'operator_id');
+    }
+
+    public function transactionItems(): HasMany
+    {
+        return $this->hasMany(TransactionItem::class);
+    }
+
+    public function debt(): HasOne
+    {
+        return $this->hasOne(Debt::class);
+    }
 }

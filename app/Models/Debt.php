@@ -3,6 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+
 class Debt extends Model
 {
     protected $fillable = [
@@ -24,4 +27,20 @@ class Debt extends Model
         'fully_paid_at' => 'datetime',
     ];
 
+    public function farmer(): BelongsTo
+    {
+        return $this->belongsTo(Farmer::class);
+    }
+
+    public function transaction(): BelongsTo
+    {
+        return $this->belongsTo(Transaction::class);
+    }
+
+    public function repayments(): BelongsToMany
+    {
+        return $this->belongsToMany(Repayment::class, 'repayment_debt')
+            ->withPivot('amount_applied_fcfa')
+            ->withTimestamps();
+    }
 }
